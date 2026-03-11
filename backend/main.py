@@ -1,0 +1,110 @@
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
+from typing import Optional, List
+import models, schemas, crud, auth
+from database import SessionLocal, engine
+
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Task Manager API", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    payload = auth.decode_token(token)
+    if payload is None:
+        raise credentials_exception
+    username: str = payload.get("sub")
+    if username is None:
+        raise credentials_exception
+    user = crud.get_user_by_username(db, username=username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+# ─── AUTH ROUTES ────────────────────────────────────────────────────────────────
+
+@app.post("/auth/signup", response_model=schemas.UserOut, status_code=201)
+def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    if crud.get_user_by_username(db, user.username):
+        raise HTTPException(status_code=400, detail="Username already taken")
+    if crud.get_user_by_email(db, user.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return crud.create_user(db, user)
+
+@app.post("/auth/login", response_model=schemas.Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = crud.authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = auth.create_access_token(data={"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer", "user": user}
+
+@app.get("/auth/me", response_model=schemas.UserOut)
+def get_me(current_user=Depends(get_current_user)):
+    return current_user
+
+# ─── TASK ROUTES ────────────────────────────────────────────────────────────────
+
+@app.get("/tasks", response_model=List[schemas.TaskOut])
+def get_tasks(
+    status: Optional[str] = None,
+    priority: Optional[str] = None,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return crud.get_tasks(db, user_id=current_user.id, status=status, priority=priority)
+
+@app.post("/tasks", response_model=schemas.TaskOut, status_code=201)
+def create_task(task: schemas.TaskCreate, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return crud.create_task(db, task, user_id=current_user.id)
+
+@app.get("/tasks/{task_id}", response_model=schemas.TaskOut)
+def get_task(task_id: int, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    task = crud.get_task(db, task_id, user_id=current_user.id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+@app.put("/tasks/{task_id}", response_model=schemas.TaskOut)
+def update_task(task_id: int, task_update: schemas.TaskUpdate, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    task = crud.update_task(db, task_id, task_update, user_id=current_user.id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    if not crud.delete_task(db, task_id, user_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Task not found")
+
+@app.get("/tasks/stats/summary", response_model=schemas.TaskStats)
+def get_stats(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return crud.get_task_stats(db, user_id=current_user.id)
