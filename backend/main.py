@@ -45,7 +45,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     return user
 
-# ─── AUTH ROUTES ────────────────────────────────────────────────────────────────
+# ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
 
 @app.post("/auth/signup", response_model=schemas.UserOut, status_code=201)
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -71,7 +71,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 def get_me(current_user=Depends(get_current_user)):
     return current_user
 
-# ─── TASK ROUTES ────────────────────────────────────────────────────────────────
+# ─── TASK ROUTES ─────────────────────────────────────────────────────────────
 
 @app.get("/tasks", response_model=List[schemas.TaskOut])
 def get_tasks(
@@ -85,6 +85,10 @@ def get_tasks(
 @app.post("/tasks", response_model=schemas.TaskOut, status_code=201)
 def create_task(task: schemas.TaskCreate, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     return crud.create_task(db, task, user_id=current_user.id)
+
+@app.get("/tasks/stats/summary", response_model=schemas.TaskStats)
+def get_stats(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    return crud.get_task_stats(db, user_id=current_user.id)
 
 @app.get("/tasks/{task_id}", response_model=schemas.TaskOut)
 def get_task(task_id: int, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
@@ -105,11 +109,17 @@ def delete_task(task_id: int, current_user=Depends(get_current_user), db: Sessio
     if not crud.delete_task(db, task_id, user_id=current_user.id):
         raise HTTPException(status_code=404, detail="Task not found")
 
-@app.get("/tasks/stats/summary", response_model=schemas.TaskStats)
-def get_stats(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
-    return crud.get_task_stats(db, user_id=current_user.id)
+# ─── ADMIN ROUTES ─────────────────────────────────────────────────────────────
 
 @app.get("/admin/users")
 def list_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
-    return [{"id": u.id, "username": u.username, "email": u.email, "created_at": u.created_at} for u in users]
+    return [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "created_at": u.created_at
+        }
+        for u in users
+    ]
