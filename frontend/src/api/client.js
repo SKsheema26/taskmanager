@@ -4,7 +4,6 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE,
-  headers: { 'Content-Type': 'application/json' },
   timeout: 60000,
 });
 
@@ -28,7 +27,7 @@ api.interceptors.response.use(
   }
 );
 
-// ─── AUTH ────────────────────────────────────────────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
 export const authAPI = {
   signup: (data) => api.post('/auth/signup', data),
   login: (username, password) => {
@@ -42,7 +41,7 @@ export const authAPI = {
   me: () => api.get('/auth/me'),
 };
 
-// ─── TASKS ───────────────────────────────────────────────────────────────────────
+// ─── TASKS ────────────────────────────────────────────────────────────────────
 export const tasksAPI = {
   getAll: (params) => api.get('/tasks', { params }),
   getOne: (id) => api.get(`/tasks/${id}`),

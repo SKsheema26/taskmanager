@@ -12,21 +12,36 @@ export default function SignupPage() {
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.username || !form.email || !form.password) { setError('Please fill in all required fields.'); return; }
-    if (form.password !== form.confirm) { setError('Passwords do not match.'); return; }
-    if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+  e.preventDefault();
+  if (!form.username || !form.email || !form.password) { 
+    setError('Please fill in all required fields.'); 
+    return; 
+  }
+  if (form.password !== form.confirm) { 
+    setError('Passwords do not match.'); 
+    return; 
+  }
+  if (form.password.length < 6) { 
+    setError('Password must be at least 6 characters.'); 
+    return; 
+  }
 
-    setLoading(true); setError('');
-    try {
-      await signup({ username: form.username, email: form.email, full_name: form.full_name, password: form.password });
-      navigate('/login', { state: { message: 'Account created! Please sign in.' } });
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true); 
+  setError('');
+  try {
+    await signup({ 
+      username: form.username, 
+      email: form.email, 
+      full_name: form.full_name, 
+      password: form.password 
+    });
+    navigate('/login');
+  } catch (err) {
+    const message = err.response?.data?.detail || err.message || 'Something went wrong.';
+    setError(message);
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page">
