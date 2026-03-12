@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 import hashlib
-import os
 import secrets
+import os
 
-SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey1926taskmanager1926")																	
+SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey1926taskmanager1926")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 

@@ -1,9 +1,6 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import Optional
 import models, schemas, auth
-
-# ─── USER CRUD ───────────────────────────────────────────────────────────────────
 
 def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
@@ -31,8 +28,6 @@ def authenticate_user(db: Session, username: str, password: str):
     if not auth.verify_password(password, user.hashed_password):
         return None
     return user
-
-# ─── TASK CRUD ───────────────────────────────────────────────────────────────────
 
 def get_tasks(db: Session, user_id: int, status: Optional[str] = None, priority: Optional[str] = None):
     query = db.query(models.Task).filter(models.Task.user_id == user_id)
