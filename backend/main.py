@@ -108,3 +108,8 @@ def delete_task(task_id: int, current_user=Depends(get_current_user), db: Sessio
 @app.get("/tasks/stats/summary", response_model=schemas.TaskStats)
 def get_stats(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     return crud.get_task_stats(db, user_id=current_user.id)
+
+@app.get("/admin/users")
+def list_users(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return [{"id": u.id, "username": u.username, "email": u.email, "created_at": u.created_at} for u in users]
