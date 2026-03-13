@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
 from typing import Optional, List
 import models, schemas, crud, auth
 from database import SessionLocal, engine
@@ -53,7 +52,35 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already taken")
     if crud.get_user_by_email(db, user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db, user)
+    token = auth.generate_verification_token()
+    new_user = crud.create_user(db, user, verification_token=token)
+    auth.send_verification_email(new_user.email, new_user.username, token)
+    return new_user
+
+@app.get("/auth/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(
+        models.User.verification_token == token
+    ).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    user.is_active = True
+    user.verification_token = None
+    db.commit()
+    return {"message": "Email verified successfully! You can now login."}
+
+@app.post("/auth/resend-verification")
+def resend_verification(email: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_email(db, email)
+    if not user:
+        raise HTTPException(status_code=404, detail="Email not found")
+    if user.is_active:
+        raise HTTPException(status_code=400, detail="Email already verified")
+    token = auth.generate_verification_token()
+    user.verification_token = token
+    db.commit()
+    auth.send_verification_email(user.email, user.username, token)
+    return {"message": "Verification email resent"}
 
 @app.post("/auth/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -63,6 +90,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email before logging in",
         )
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer", "user": user}
@@ -119,6 +151,7 @@ def list_users(db: Session = Depends(get_db)):
             "id": u.id,
             "username": u.username,
             "email": u.email,
+            "is_active": u.is_active,
             "created_at": u.created_at
         }
         for u in users

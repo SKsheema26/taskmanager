@@ -1,18 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
-import enum
-
-class TaskStatus(str, enum.Enum):
-    todo = "todo"
-    in_progress = "in_progress"
-    completed = "completed"
-
-class TaskPriority(str, enum.Enum):
-    low = "low"
-    medium = "medium"
-    high = "high"
 
 class User(Base):
     __tablename__ = "users"
@@ -23,7 +12,8 @@ class User(Base):
     hashed_password = Column(String(200), nullable=False)
     full_name = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=False)  # False until email verified
+    verification_token = Column(String(200), nullable=True)  # email token
 
     tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
 

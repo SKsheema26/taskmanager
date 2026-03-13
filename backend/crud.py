@@ -8,13 +8,15 @@ def get_user_by_username(db: Session, username: str):
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user(db: Session, user: schemas.UserCreate, verification_token: str = None):
     hashed_pw = auth.hash_password(user.password)
     db_user = models.User(
         username=user.username,
         email=user.email,
         hashed_password=hashed_pw,
-        full_name=user.full_name
+        full_name=user.full_name,
+        is_active=False,
+        verification_token=verification_token
     )
     db.add(db_user)
     db.commit()
