@@ -118,10 +118,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Priority</div>
           <nav className="sidebar-nav">
             {[
-              { key: "", icon: "🔍", label: "All priorities" },
-              { key: "high", icon: "🔴", label: "High" },
-              { key: "medium", icon: "🟡", label: "Medium" },
-              { key: "low", icon: "🟢", label: "Low" },
+              { key: "", icon: "•", label: "All priorities" },
+              { key: "high", icon: "▲", label: "High" },
+              { key: "medium", icon: "—", label: "Medium" },
+              { key: "low", icon: "▽", label: "Low" },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${filterPriority === item.key && activeColumn === "all" ? "active" : ""}`}
