@@ -1,18 +1,22 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+﻿from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import Optional, List
 import models, schemas, crud, auth
 from database import SessionLocal, engine
 
+# Create tables
 models.Base.metadata.create_all(bind=engine)
 
-from sqlalchemy import text
+# Add missing columns if they do not exist
 try:
     with engine.connect() as conn:
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(200)"))
+        conn.execute(text("ALTER TABLE users ALTER COLUMN is_active SET DEFAULT true"))
         conn.commit()
+        print("Migration completed successfully")
 except Exception as e:
     print(f"Migration note: {e}")
 
@@ -52,7 +56,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     return user
 
-# ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
+# AUTH ROUTES
 
 @app.post("/auth/signup", response_model=schemas.UserOut, status_code=201)
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -111,7 +115,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 def get_me(current_user=Depends(get_current_user)):
     return current_user
 
-# ─── TASK ROUTES ─────────────────────────────────────────────────────────────
+# TASK ROUTES
 
 @app.get("/tasks", response_model=List[schemas.TaskOut])
 def get_tasks(
@@ -149,7 +153,7 @@ def delete_task(task_id: int, current_user=Depends(get_current_user), db: Sessio
     if not crud.delete_task(db, task_id, user_id=current_user.id):
         raise HTTPException(status_code=404, detail="Task not found")
 
-# ─── ADMIN ROUTES ─────────────────────────────────────────────────────────────
+# ADMIN ROUTES
 
 @app.get("/admin/users")
 def list_users(db: Session = Depends(get_db)):
