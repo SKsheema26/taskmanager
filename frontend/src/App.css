@@ -515,3 +515,52 @@ body {
   height: 100%; background: var(--accent);
   border-radius: 20px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* --- DARK MODE -------------------------------------------------------------- */
+[data-theme="dark"] {
+  --bg: #111110;
+  --surface: #1A1917;
+  --surface-2: #222220;
+  --border: #2E2C28;
+  --border-hover: #3D3B36;
+  --text-primary: #F0EDE8;
+  --text-secondary: #A09D97;
+  --text-muted: #666360;
+  --accent: #F97316;
+  --accent-light: #2A1A0E;
+  --accent-hover: #EA6A0A;
+  --danger: #F87171;
+  --danger-light: #2A1212;
+  --warning: #FBBF24;
+  --warning-light: #2A2010;
+  --info: #60A5FA;
+  --info-light: #0E1D2E;
+  --todo-color: #A09D97;
+  --todo-bg: #222220;
+  --progress-color: #60A5FA;
+  --progress-bg: #0E1D2E;
+  --done-color: #34D399;
+  --done-bg: #0C2420;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  background: var(--border);
+  transform: scale(1.05);
+}
