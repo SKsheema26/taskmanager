@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
+import { useTheme } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { tasksAPI } from '../api/client';
 import TaskModal from '../components/TaskModal';
@@ -24,6 +25,7 @@ function isOverdue(dateStr) {
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState({ total: 0, todo: 0, in_progress: 0, completed: 0, high_priority: 0 });
   const [loading, setLoading] = useState(true);
@@ -97,10 +99,10 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard">
-      {/* ─── SIDEBAR ─────────────────────────────────────────────────── */}
+      {/* â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">✓</div>
+          <div className="sidebar-logo-icon">âœ“</div>
           <span>TaskManager</span>
         </div>
 
@@ -108,10 +110,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Views</div>
           <nav className="sidebar-nav">
             {[
-              { key: 'all', icon: '⊞', label: 'All Tasks', count: stats.total },
-              { key: 'todo', icon: '○', label: 'To Do', count: stats.todo },
-              { key: 'in_progress', icon: '◑', label: 'In Progress', count: stats.in_progress },
-              { key: 'completed', icon: '●', label: 'Completed', count: stats.completed },
+              { key: 'all', icon: 'âŠž', label: 'All Tasks', count: stats.total },
+              { key: 'todo', icon: 'â—‹', label: 'To Do', count: stats.todo },
+              { key: 'in_progress', icon: 'â—‘', label: 'In Progress', count: stats.in_progress },
+              { key: 'completed', icon: 'â—', label: 'Completed', count: stats.completed },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${activeColumn === item.key ? 'active' : ''}`}
@@ -128,10 +130,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Priority</div>
           <nav className="sidebar-nav">
             {[
-              { key: '', icon: '≡', label: 'All priorities' },
-              { key: 'high', icon: '▲', label: 'High' },
-              { key: 'medium', icon: '─', label: 'Medium' },
-              { key: 'low', icon: '▽', label: 'Low' },
+              { key: '', icon: 'â‰¡', label: 'All priorities' },
+              { key: 'high', icon: 'â–²', label: 'High' },
+              { key: 'medium', icon: 'â”€', label: 'Medium' },
+              { key: 'low', icon: 'â–½', label: 'Low' },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${filterPriority === item.key && activeColumn === 'all' ? 'active' : ''}`}
@@ -150,12 +152,13 @@ export default function DashboardPage() {
               <div className="user-name">{user?.full_name || user?.username}</div>
               <div className="user-email">{user?.email}</div>
             </div>
-            <button className="btn-logout" onClick={logout} title="Sign out">↪</button>
+            <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">{theme === "light" ? "🌙" : "☀️"}</button>
+            <button className="btn-logout" onClick={logout} title="Sign out">â†ª</button>
           </div>
         </div>
       </aside>
 
-      {/* ─── MAIN ────────────────────────────────────────────────────── */}
+      {/* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <main className="main-content">
         <div className="page-header">
           <div>
@@ -213,7 +216,7 @@ export default function DashboardPage() {
 
         {/* Search */}
         <div className="filters-bar">
-          <input className="search-input" placeholder="Search tasks…"
+          <input className="search-input" placeholder="Search tasksâ€¦"
             value={search} onChange={e => setSearch(e.target.value)} />
           <select className="filter-select" value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
             <option value="">All priorities</option>
@@ -269,7 +272,7 @@ function TaskColumn({ col, tasks, onEdit, onDelete, onToggleStatus, singleView }
       {tasks.length === 0 ? (
         <div className="empty-column">
           <div className="empty-icon">
-            {col.key === 'todo' ? '📋' : col.key === 'in_progress' ? '⚡' : '✅'}
+            {col.key === 'todo' ? 'ðŸ“‹' : col.key === 'in_progress' ? 'âš¡' : 'âœ…'}
           </div>
           No tasks here
         </div>
@@ -303,17 +306,18 @@ function TaskCard({ task, onEdit, onDelete, onToggleStatus }) {
       <div className="task-footer">
         <div className="task-meta">
           <span className={`priority-tag ${task.priority}`}>{task.priority}</span>
-          {due && <span className={`due-date ${overdue ? 'overdue' : ''}`}>{overdue ? '⚠ ' : ''}{due}</span>}
+          {due && <span className={`due-date ${overdue ? 'overdue' : ''}`}>{overdue ? 'âš  ' : ''}{due}</span>}
         </div>
         <div className="task-actions">
           <button className="task-btn" title="Advance status"
             onClick={e => onToggleStatus(task, e)}>
-            {task.status === 'completed' ? '↺' : task.status === 'todo' ? '▷' : '✓'}
+            {task.status === 'completed' ? 'â†º' : task.status === 'todo' ? 'â–·' : 'âœ“'}
           </button>
           <button className="task-btn delete" title="Delete"
-            onClick={e => onDelete(task.id, e)}>✕</button>
+            onClick={e => onDelete(task.id, e)}>âœ•</button>
         </div>
       </div>
     </div>
   );
 }
+
