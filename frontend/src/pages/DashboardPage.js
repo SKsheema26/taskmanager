@@ -98,10 +98,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Views</div>
           <nav className="sidebar-nav">
             {[
-              { key: "all", icon: "#", label: "All Tasks", count: stats.total },
-              { key: "todo", icon: "o", label: "To Do", count: stats.todo },
-              { key: "in_progress", icon: "~", label: "In Progress", count: stats.in_progress },
-              { key: "completed", icon: "*", label: "Completed", count: stats.completed },
+              { key: "all", icon: "\u229E", label: "All Tasks", count: stats.total },
+              { key: "todo", icon: "\u25CB", label: "To Do", count: stats.todo },
+              { key: "in_progress", icon: "\u25D1", label: "In Progress", count: stats.in_progress },
+              { key: "completed", icon: "\u25CF", label: "Completed", count: stats.completed },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${activeColumn === item.key ? "active" : ""}`}
@@ -118,10 +118,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Priority</div>
           <nav className="sidebar-nav">
             {[
-              { key: "", icon: "=", label: "All priorities" },
-              { key: "high", icon: "^", label: "High" },
-              { key: "medium", icon: "-", label: "Medium" },
-              { key: "low", icon: "v", label: "Low" },
+              { key: "", icon: "\u2261", label: "All priorities" },
+              { key: "high", icon: "\u25B2", label: "High" },
+              { key: "medium", icon: "\u2500", label: "Medium" },
+              { key: "low", icon: "\u25BD", label: "Low" },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${filterPriority === item.key && activeColumn === "all" ? "active" : ""}`}
@@ -257,7 +257,7 @@ function TaskColumn({ col, tasks, onEdit, onDelete, onToggleStatus, singleView }
       {tasks.length === 0 ? (
         <div className="empty-column">
           <div className="empty-icon">
-            {col.key === "todo" ? "[ ]" : col.key === "in_progress" ? "..." : "[x]"}
+            {col.key === "todo" ? "\uD83D\uDCCB" : col.key === "in_progress" ? "\u26A1" : "\u2705"}
           </div>
           No tasks here
         </div>
@@ -296,7 +296,7 @@ function TaskCard({ task, onEdit, onDelete, onToggleStatus }) {
         <div className="task-actions">
           <button className="task-btn" title="Advance status"
             onClick={e => onToggleStatus(task, e)}>
-            {task.status === "completed" ? "R" : task.status === "todo" ? ">" : "ok"}
+            {task.status === "completed" ? "\u21BA" : task.status === "todo" ? "\u25B7" : "\u2713"}
           </button>
           <button className="task-btn delete" title="Delete"
             onClick={e => onDelete(task.id, e)}>x</button>
@@ -305,3 +305,4 @@ function TaskCard({ task, onEdit, onDelete, onToggleStatus }) {
     </div>
   );
 }
+
