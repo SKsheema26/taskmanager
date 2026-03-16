@@ -8,6 +8,14 @@ from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
+from sqlalchemy import text
+try:
+    with engine.connect() as conn:
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(200)"))
+        conn.commit()
+except Exception as e:
+    print(f"Migration note: {e}")
+
 app = FastAPI(title="Task Manager API", version="1.0.0")
 
 app.add_middleware(
