@@ -90,7 +90,7 @@ export default function DashboardPage() {
     <div className="dashboard">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">+</div>
+         <div className="sidebar-logo-icon">✔</div>
           <span>TaskManager</span>
         </div>
 
@@ -98,10 +98,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Views</div>
           <nav className="sidebar-nav">
             {[
-              { key: "all", icon: "\u229E", label: "All Tasks", count: stats.total },
-              { key: "todo", icon: "\u25CB", label: "To Do", count: stats.todo },
-              { key: "in_progress", icon: "\u25D1", label: "In Progress", count: stats.in_progress },
-              { key: "completed", icon: "\u25CF", label: "Completed", count: stats.completed },
+              { key: "all", icon: "📋", label: "All Tasks", count: stats.total },
+              { key: "todo", icon: "📝", label: "To Do", count: stats.todo },
+              { key: "in_progress", icon: "⚡", label: "In Progress", count: stats.in_progress },
+              { key: "completed", icon: "✅", label: "Completed", count: stats.completed },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${activeColumn === item.key ? "active" : ""}`}
@@ -118,10 +118,10 @@ export default function DashboardPage() {
           <div className="sidebar-label">Priority</div>
           <nav className="sidebar-nav">
             {[
-              { key: "", icon: "\u2261", label: "All priorities" },
-              { key: "high", icon: "\u25B2", label: "High" },
-              { key: "medium", icon: "\u2500", label: "Medium" },
-              { key: "low", icon: "\u25BD", label: "Low" },
+              { key: "", icon: "🔍", label: "All priorities" },
+              { key: "high", icon: "🔴", label: "High" },
+              { key: "medium", icon: "🟡", label: "Medium" },
+              { key: "low", icon: "🟢", label: "Low" },
             ].map(item => (
               <button key={item.key}
                 className={`sidebar-item ${filterPriority === item.key && activeColumn === "all" ? "active" : ""}`}
