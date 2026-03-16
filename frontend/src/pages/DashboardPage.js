@@ -1,27 +1,16 @@
-﻿import { useState, useEffect, useCallback } from 'react';
-import { useTheme } from '../App';
-import { useAuth } from '../context/AuthContext';
-import { tasksAPI } from '../api/client';
-import TaskModal from '../components/TaskModal';
+﻿import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../App";
+import { tasksAPI } from "../api/client";
+import TaskModal from "../components/TaskModal";
 
 const COLUMNS = [
-  { key: 'todo', label: 'To Do' },
-  { key: 'in_progress', label: 'In Progress' },
-  { key: 'completed', label: 'Completed' },
+  { key: "todo", label: "To Do" },
+  { key: "in_progress", label: "In Progress" },
+  { key: "completed", label: "Completed" },
 ];
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-
-function formatDate(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function isOverdue(dateStr) {
-  if (!dateStr) return false;
-  return new Date(dateStr) < new Date();
-}
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -29,9 +18,9 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState({ total: 0, todo: 0, in_progress: 0, completed: 0, high_priority: 0 });
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filterPriority, setFilterPriority] = useState('');
-  const [activeColumn, setActiveColumn] = useState('all');
+  const [search, setSearch] = useState("");
+  const [filterPriority, setFilterPriority] = useState("");
+  const [activeColumn, setActiveColumn] = useState("all");
   const [modal, setModal] = useState({ open: false, task: null });
 
   const loadTasks = useCallback(async () => {
@@ -43,7 +32,7 @@ export default function DashboardPage() {
       setTasks(tasksRes.data);
       setStats(statsRes.data);
     } catch (err) {
-      console.error('Failed to load tasks', err);
+      console.error("Failed to load tasks", err);
     } finally {
       setLoading(false);
     }
@@ -66,15 +55,15 @@ export default function DashboardPage() {
 
   const handleDelete = async (taskId, e) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this task?')) return;
+    if (!window.confirm("Delete this task?")) return;
     await tasksAPI.delete(taskId);
     await loadTasks();
   };
 
   const handleStatusToggle = async (task, e) => {
     e.stopPropagation();
-    const next = task.status === 'completed' ? 'todo'
-      : task.status === 'todo' ? 'in_progress' : 'completed';
+    const next = task.status === "completed" ? "todo"
+      : task.status === "todo" ? "in_progress" : "completed";
     await tasksAPI.update(task.id, { status: next });
     await loadTasks();
   };
@@ -83,7 +72,7 @@ export default function DashboardPage() {
     .filter(t => {
       if (filterPriority && t.priority !== filterPriority) return false;
       if (search && !t.title.toLowerCase().includes(search.toLowerCase()) &&
-          !(t.description || '').toLowerCase().includes(search.toLowerCase())) return false;
+          !(t.description || "").toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     })
     .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
@@ -92,17 +81,16 @@ export default function DashboardPage() {
 
   const completionPct = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
   const initials = user?.full_name
-    ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : (user?.username || 'U')[0].toUpperCase();
+    ? user.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : (user?.username || "U")[0].toUpperCase();
 
   if (loading) return <div className="loading-screen"><div className="spinner" /></div>;
 
   return (
     <div className="dashboard">
-      {/* â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">âœ“</div>
+          <div className="sidebar-logo-icon">+</div>
           <span>TaskManager</span>
         </div>
 
@@ -110,13 +98,13 @@ export default function DashboardPage() {
           <div className="sidebar-label">Views</div>
           <nav className="sidebar-nav">
             {[
-              { key: 'all', icon: 'âŠž', label: 'All Tasks', count: stats.total },
-              { key: 'todo', icon: 'â—‹', label: 'To Do', count: stats.todo },
-              { key: 'in_progress', icon: 'â—‘', label: 'In Progress', count: stats.in_progress },
-              { key: 'completed', icon: 'â—', label: 'Completed', count: stats.completed },
+              { key: "all", icon: "#", label: "All Tasks", count: stats.total },
+              { key: "todo", icon: "o", label: "To Do", count: stats.todo },
+              { key: "in_progress", icon: "~", label: "In Progress", count: stats.in_progress },
+              { key: "completed", icon: "*", label: "Completed", count: stats.completed },
             ].map(item => (
               <button key={item.key}
-                className={`sidebar-item ${activeColumn === item.key ? 'active' : ''}`}
+                className={`sidebar-item ${activeColumn === item.key ? "active" : ""}`}
                 onClick={() => setActiveColumn(item.key)}>
                 <span className="icon">{item.icon}</span>
                 {item.label}
@@ -130,14 +118,14 @@ export default function DashboardPage() {
           <div className="sidebar-label">Priority</div>
           <nav className="sidebar-nav">
             {[
-              { key: '', icon: 'â‰¡', label: 'All priorities' },
-              { key: 'high', icon: 'â–²', label: 'High' },
-              { key: 'medium', icon: 'â”€', label: 'Medium' },
-              { key: 'low', icon: 'â–½', label: 'Low' },
+              { key: "", icon: "=", label: "All priorities" },
+              { key: "high", icon: "^", label: "High" },
+              { key: "medium", icon: "-", label: "Medium" },
+              { key: "low", icon: "v", label: "Low" },
             ].map(item => (
               <button key={item.key}
-                className={`sidebar-item ${filterPriority === item.key && activeColumn === 'all' ? 'active' : ''}`}
-                onClick={() => { setFilterPriority(item.key); setActiveColumn('all'); }}>
+                className={`sidebar-item ${filterPriority === item.key && activeColumn === "all" ? "active" : ""}`}
+                onClick={() => { setFilterPriority(item.key); setActiveColumn("all"); }}>
                 <span className="icon">{item.icon}</span>
                 {item.label}
               </button>
@@ -152,24 +140,25 @@ export default function DashboardPage() {
               <div className="user-name">{user?.full_name || user?.username}</div>
               <div className="user-email">{user?.email}</div>
             </div>
-            <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">{theme === "light" ? "🌙" : "☀️"}</button>
-            <button className="btn-logout" onClick={logout} title="Sign out">â†ª</button>
+            <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+              {theme === "light" ? "🌙" : "☀️"}
+            </button>
+            <button className="btn-logout" onClick={logout} title="Sign out">out</button>
           </div>
         </div>
       </aside>
 
-      {/* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <main className="main-content">
         <div className="page-header">
           <div>
             <h1 className="page-title">
-              {activeColumn === 'all' ? 'All Tasks'
-                : activeColumn === 'todo' ? 'To Do'
-                : activeColumn === 'in_progress' ? 'In Progress'
-                : 'Completed'}
+              {activeColumn === "all" ? "All Tasks"
+                : activeColumn === "todo" ? "To Do"
+                : activeColumn === "in_progress" ? "In Progress"
+                : "Completed"}
             </h1>
             <p className="page-subtitle">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
           </div>
           <button className="btn-add" onClick={handleCreate}>
@@ -177,7 +166,6 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Progress */}
         {stats.total > 0 && (
           <div className="progress-section">
             <div className="progress-header">
@@ -190,7 +178,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Stats */}
         <div className="stats-grid">
           <div className="stat-card total">
             <div className="stat-label">Total</div>
@@ -214,9 +201,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="filters-bar">
-          <input className="search-input" placeholder="Search tasksâ€¦"
+          <input className="search-input" placeholder="Search tasks..."
             value={search} onChange={e => setSearch(e.target.value)} />
           <select className="filter-select" value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
             <option value="">All priorities</option>
@@ -226,8 +212,7 @@ export default function DashboardPage() {
           </select>
         </div>
 
-        {/* Columns */}
-        {activeColumn === 'all' ? (
+        {activeColumn === "all" ? (
           <div className="tasks-columns">
             {COLUMNS.map(col => (
               <TaskColumn key={col.key} col={col}
@@ -259,7 +244,7 @@ export default function DashboardPage() {
 
 function TaskColumn({ col, tasks, onEdit, onDelete, onToggleStatus, singleView }) {
   return (
-    <div className="column" style={singleView ? { background: 'transparent', border: 'none', padding: 0 } : {}}>
+    <div className="column" style={singleView ? { background: "transparent", border: "none", padding: 0 } : {}}>
       {!singleView && (
         <div className="column-header">
           <div className="column-title">
@@ -272,7 +257,7 @@ function TaskColumn({ col, tasks, onEdit, onDelete, onToggleStatus, singleView }
       {tasks.length === 0 ? (
         <div className="empty-column">
           <div className="empty-icon">
-            {col.key === 'todo' ? 'ðŸ“‹' : col.key === 'in_progress' ? 'âš¡' : 'âœ…'}
+            {col.key === "todo" ? "[ ]" : col.key === "in_progress" ? "..." : "[x]"}
           </div>
           No tasks here
         </div>
@@ -287,13 +272,13 @@ function TaskColumn({ col, tasks, onEdit, onDelete, onToggleStatus, singleView }
 }
 
 function TaskCard({ task, onEdit, onDelete, onToggleStatus }) {
-  const due = task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
-  const overdue = task.status !== 'completed' && task.due_date && new Date(task.due_date) < new Date();
+  const due = task.due_date ? new Date(task.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
+  const overdue = task.status !== "completed" && task.due_date && new Date(task.due_date) < new Date();
 
   return (
     <div className="task-card" onClick={() => onEdit(task)}>
       <div className="task-card-header">
-        <div className={`task-title ${task.status === 'completed' ? 'done' : ''}`}>
+        <div className={`task-title ${task.status === "completed" ? "done" : ""}`}>
           {task.title}
         </div>
         <span className={`priority-dot ${task.priority}`} title={`${task.priority} priority`} />
@@ -306,18 +291,17 @@ function TaskCard({ task, onEdit, onDelete, onToggleStatus }) {
       <div className="task-footer">
         <div className="task-meta">
           <span className={`priority-tag ${task.priority}`}>{task.priority}</span>
-          {due && <span className={`due-date ${overdue ? 'overdue' : ''}`}>{overdue ? 'âš  ' : ''}{due}</span>}
+          {due && <span className={`due-date ${overdue ? "overdue" : ""}`}>{overdue ? "! " : ""}{due}</span>}
         </div>
         <div className="task-actions">
           <button className="task-btn" title="Advance status"
             onClick={e => onToggleStatus(task, e)}>
-            {task.status === 'completed' ? 'â†º' : task.status === 'todo' ? 'â–·' : 'âœ“'}
+            {task.status === "completed" ? "R" : task.status === "todo" ? ">" : "ok"}
           </button>
           <button className="task-btn delete" title="Delete"
-            onClick={e => onDelete(task.id, e)}>âœ•</button>
+            onClick={e => onDelete(task.id, e)}>x</button>
         </div>
       </div>
     </div>
   );
 }
-
